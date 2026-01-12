@@ -50,6 +50,7 @@ class FlutterOverlayWindow {
     bool enableDrag = false,
     PositionGravity positionGravity = PositionGravity.none,
     OverlayPosition? startPosition,
+    int windowInsets = WindowInsetsType.defaultVisible,
   }) async {
     await _channel.invokeMethod(
       'showOverlay',
@@ -64,6 +65,7 @@ class FlutterOverlayWindow {
         "notificationVisibility": visibility.name,
         "positionGravity": positionGravity.name,
         "startPosition": startPosition?.toMap(),
+        "windowInsets": windowInsets,
       },
     );
   }

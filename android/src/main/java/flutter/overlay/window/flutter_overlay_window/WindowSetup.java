@@ -2,6 +2,7 @@ package flutter.overlay.window.flutter_overlay_window;
 
 
 import android.view.Gravity;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 
 import androidx.core.app.NotificationCompat;
@@ -20,6 +21,7 @@ public abstract class WindowSetup {
     static String positionGravity = "none";
     static int notificationVisibility = NotificationCompat.VISIBILITY_PRIVATE;
     static boolean enableDrag = false;
+    static int windowInsets = WindowInsets.Type.systemBars();
 
 
     static void setNotificationVisibility(String name) {

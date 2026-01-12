@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_overlay_window_example/home_page.dart';
+import 'package:flutter_overlay_window_example/overlays/fullscreen_overlay.dart';
 import 'package:flutter_overlay_window_example/overlays/true_caller_overlay.dart';
 
 void main() {
@@ -14,6 +15,7 @@ void overlayMain() {
     const MaterialApp(
       debugShowCheckedModeBanner: false,
       home: TrueCallerOverlay(),
+      // home: FullscreenOverlay(),  /// Uncomment to test FullscreenOverlay
     ),
   );
 }

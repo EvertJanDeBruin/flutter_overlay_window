@@ -18,6 +18,34 @@ class _HomePageState extends State<HomePage> {
   final _receivePort = ReceivePort();
   SendPort? homePort;
   String? latestMessageFromOverlay;
+  
+  // Selected window insets types
+  Set<int> selectedInsetsTypes = {WindowInsetsType.statusBars, WindowInsetsType.navigationBars};
+  
+  // Collapsible section state
+  bool _isInsetsExpanded = false;
+  
+  // Available window insets types
+  final List<MapEntry<String, int>> insetsTypes = [
+    MapEntry('Status Bars', WindowInsetsType.statusBars),
+    MapEntry('Navigation Bars', WindowInsetsType.navigationBars),
+    MapEntry('Caption Bar', WindowInsetsType.captionBar),
+    MapEntry('IME', WindowInsetsType.ime),
+    MapEntry('System Gestures', WindowInsetsType.systemGestures),
+    MapEntry('Mandatory System Gestures', WindowInsetsType.mandatorySystemGestures),
+    MapEntry('Tappable Element', WindowInsetsType.tappableElement),
+    MapEntry('Display Cutout', WindowInsetsType.displayCutout),
+    MapEntry('Window Decor', WindowInsetsType.windowDecor),
+    MapEntry('System Overlays', WindowInsetsType.systemOverlays),
+  ];
+
+  int combineSelectedInsets() {
+    int combined = 0;
+    for (var type in selectedInsetsTypes) {
+      combined |= type;
+    }
+    return combined;
+  }
 
   @override
   void initState() {
@@ -42,9 +70,59 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: const Text('Plugin example app'),
       ),
-      body: Center(
+      body: SingleChildScrollView(
         child: Column(
           children: [
+            InkWell(
+              onTap: () {
+                setState(() {
+                  _isInsetsExpanded = !_isInsetsExpanded;
+                });
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                child: Row(
+                  children: [
+                    Icon(
+                      _isInsetsExpanded ? Icons.expand_less : Icons.expand_more,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 4),
+                    const Text(
+                      'Window Insets',
+                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            if (_isInsetsExpanded)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+                child: Wrap(
+                  spacing: 4,
+                  runSpacing: 4,
+                  children: insetsTypes.map((entry) {
+                    final isSelected = selectedInsetsTypes.contains(entry.value);
+                    return FilterChip(
+                      label: Text(entry.key, style: const TextStyle(fontSize: 11)),
+                      selected: isSelected,
+                      visualDensity: VisualDensity.compact,
+                      padding: EdgeInsets.zero,
+                      onSelected: (selected) {
+                        setState(() {
+                          if (selected) {
+                            selectedInsetsTypes.add(entry.value);
+                          } else {
+                            selectedInsetsTypes.remove(entry.value);
+                          }
+                        });
+                      },
+                    );
+                  }).toList(),
+                ),
+              ),
+            const Divider(height: 1),
             TextButton(
               onPressed: () async {
                 final status = await FlutterOverlayWindow.isPermissionGranted();
@@ -75,9 +153,29 @@ class _HomePageState extends State<HomePage> {
                   height: (MediaQuery.of(context).size.height * 0.6).toInt(),
                   width: WindowSize.matchParent,
                   startPosition: const OverlayPosition(0, -259),
+                  windowInsets: combineSelectedInsets(),
                 );
               },
               child: const Text("Show Overlay"),
+            ),
+            const SizedBox(height: 10.0),
+            TextButton(
+              onPressed: () async {
+                if (await FlutterOverlayWindow.isActive()) return;
+                await FlutterOverlayWindow.showOverlay(
+                  enableDrag: false,
+                  overlayTitle: "X-SLAYER",
+                  overlayContent: 'Fullscreen Overlay Enabled',
+                  flag: OverlayFlag.defaultFlag,
+                  visibility: NotificationVisibility.visibilityPublic,
+                  //positionGravity: PositionGravity.none,
+                  height: WindowSize.fullCover,
+                  width: WindowSize.fullCover,
+                  startPosition: const OverlayPosition(0, 0),
+                  windowInsets: combineSelectedInsets(),
+                );
+              },
+              child: const Text("Show Fullscreen Overlay"),
             ),
             const SizedBox(height: 10.0),
             TextButton(

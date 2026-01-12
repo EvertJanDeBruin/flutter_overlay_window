@@ -9,6 +9,7 @@ import android.os.Build;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
@@ -90,6 +91,8 @@ public class FlutterOverlayWindowPlugin implements
             Map<String, Integer> startPosition = call.argument("startPosition");
             int startX = startPosition != null ? startPosition.getOrDefault("x", OverlayConstants.DEFAULT_XY) : OverlayConstants.DEFAULT_XY;
             int startY = startPosition != null ? startPosition.getOrDefault("y", OverlayConstants.DEFAULT_XY) : OverlayConstants.DEFAULT_XY;
+            Integer windowInsetsInteger = call.argument("windowInsets");
+            int windowInsets = windowInsetsInteger != null ? windowInsetsInteger : ~WindowInsets.Type.ime();
 
 
             WindowSetup.width = width != null ? width : -1;
@@ -100,6 +103,7 @@ public class FlutterOverlayWindowPlugin implements
             WindowSetup.overlayTitle = overlayTitle;
             WindowSetup.overlayContent = overlayContent == null ? "" : overlayContent;
             WindowSetup.positionGravity = positionGravity;
+            WindowSetup.windowInsets = windowInsets;
             WindowSetup.setNotificationVisibility(notificationVisibility);
 
             final Intent intent = new Intent(context, OverlayService.class);
@@ -109,9 +113,6 @@ public class FlutterOverlayWindowPlugin implements
             intent.putExtra("startY", startY);
             context.startService(intent);
             result.success(null);
-        } else if (call.method.equals("isOverlayActive")) {
-            result.success(OverlayService.isRunning);
-            return;
         } else if (call.method.equals("isOverlayActive")) {
             result.success(OverlayService.isRunning);
             return;
