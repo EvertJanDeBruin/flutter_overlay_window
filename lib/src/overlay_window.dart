@@ -119,10 +119,19 @@ class FlutterOverlayWindow {
   }
 
   /// Update the overlay size in the screen
+  ///
+  /// `width` the overlay width
+  /// `height` the overlay height
+  /// `enableDrag` to enable/disable dragging the overlay
+  /// `windowInsets` the overlay insets, optional. You can combine the flags of
+  /// WindowInsetsType with the binary | operator. If not specified, the insets
+  /// will not be updated and remain at previous value.
+  /// `return` true if the size updated successfully
   static Future<bool?> resizeOverlay(
     int width,
     int height,
     bool enableDrag,
+    {int windowInsets = -1}
   ) async {
     final bool? _res = await _overlayChannel.invokeMethod<bool?>(
       'resizeOverlay',
@@ -130,6 +139,7 @@ class FlutterOverlayWindow {
         'width': width,
         'height': height,
         'enableDrag': enableDrag,
+        'windowInsets': windowInsets
       },
     );
     return _res;

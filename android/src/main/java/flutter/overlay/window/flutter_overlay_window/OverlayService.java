@@ -140,7 +140,8 @@ public class OverlayService extends Service implements View.OnTouchListener {
                 int width = call.argument("width");
                 int height = call.argument("height");
                 boolean enableDrag = call.argument("enableDrag");
-                resizeOverlay(width, height, enableDrag, result);
+                int windowInsets = call.argument("windowInsets");
+                resizeOverlay(width, height, enableDrag, windowInsets == -1 ? null : windowInsets, result);
             }
         });
         overlayMessageChannel.setMessageHandler((message, reply) -> {
@@ -157,8 +158,9 @@ public class OverlayService extends Service implements View.OnTouchListener {
             int h = displaymetrics.heightPixels;
             szWindow.set(w, h);
         }
+
         int dx = startX == OverlayConstants.DEFAULT_XY ? 0 : startX;
-        int dy = startY == OverlayConstants.DEFAULT_XY ? -statusBarHeightPx() : startY;
+        int dy = startY == OverlayConstants.DEFAULT_XY ? 0 : startY;
         WindowManager.LayoutParams params = new WindowManager.LayoutParams(
                 WindowSetup.width == -1999 ? WindowManager.LayoutParams.MATCH_PARENT : WindowSetup.width,
                 WindowSetup.height == -1999 ? WindowManager.LayoutParams.MATCH_PARENT : WindowSetup.height,// screenHeight(),
@@ -247,13 +249,17 @@ public class OverlayService extends Service implements View.OnTouchListener {
         }
     }
 
-    private void resizeOverlay(int width, int height, boolean enableDrag, MethodChannel.Result result) {
+    private void resizeOverlay(int width, int height, boolean enableDrag, Integer windowInsets, MethodChannel.Result result) {
         if (windowManager != null) {
             WindowManager.LayoutParams params = (WindowManager.LayoutParams) flutterView.getLayoutParams();
             params.width = (width == OverlayConstants.FULL_COVER || width == OverlayConstants.MATCH_PARENT) ? OverlayConstants.MATCH_PARENT : dpToPx(width);
             params.height = (height == OverlayConstants.FULL_COVER || height == OverlayConstants.MATCH_PARENT) ? OverlayConstants.MATCH_PARENT : dpToPx(height);
-
             WindowSetup.enableDrag = enableDrag;
+
+            if (windowInsets != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                params.setFitInsetsTypes(windowInsets);
+            }
+
             windowManager.updateViewLayout(flutterView, params);
             result.success(true);
         } else {
